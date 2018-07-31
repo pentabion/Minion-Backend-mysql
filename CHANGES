@@ -2,6 +2,12 @@ Revision history for Perl extension Minion::Backend::mysql.
 
 {{ $NEXT }}
 
+0.15      2018-07-31 14:53:00+03:00 Europe/Moscow
+
+  [Fixed]
+
+  - Fixed dequeue from any queue/unified workers
+
 0.14      2018-04-30 20:41:08-04:00 America/New_York
 
   [Fixed]

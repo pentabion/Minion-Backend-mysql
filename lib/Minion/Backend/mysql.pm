@@ -10,6 +10,21 @@ use Mojo::mysql;
 use Sys::Hostname 'hostname';
 use Time::Piece ();
 
+use constant GET_ITEM_FROM_QUEUE => <<SQL;
+    SELECT job.id, job.args, job.retries, job.task
+    FROM minion_jobs job
+    WHERE job.state = 'inactive' AND job.`delayed` <= NOW()
+      AND NOT EXISTS (
+        SELECT 1 FROM minion_jobs_depends depends
+        LEFT JOIN minion_jobs parent ON parent.id=depends.parent_id
+        WHERE child_id=job.id AND parent.id=depends.parent_id AND parent.state IN ( 'inactive', 'active', 'failed' )
+      )
+      %s %s
+    GROUP BY job.id
+    ORDER BY job.priority DESC, job.created
+    LIMIT 1 FOR UPDATE
+SQL
+
 has 'mysql';
 
 our $VERSION = '0.15';
@@ -438,30 +453,19 @@ sub _try {
 
   return  unless @$tasks;
 
-  my $qq = join(", ", map({ "?" } @{ $options->{queues} // ['default'] }));
-  my $qt = join(", ", map({ "?" } @{ $tasks }));
+  my $qq = join "', '", @{ $options->{queues} };
+  my $qt = join "', '", @{ $tasks };
 
   my $db = $self->mysql->db;
 
   my $tx = $db->begin;
-  my $job = $tx->db->query(qq{
-    SELECT job.id, job.args, job.retries, job.task
-    FROM minion_jobs job
-    WHERE job.state = 'inactive' AND job.`delayed` <= NOW()
-      AND NOT EXISTS (
-        SELECT 1 FROM minion_jobs_depends depends
-        LEFT JOIN minion_jobs parent ON parent.id=depends.parent_id
-        WHERE child_id=job.id AND parent.id=depends.parent_id AND parent.state IN ( 'inactive', 'active', 'failed' )
-      )
-      AND job.queue IN ($qq) AND job.task IN ($qt)
-    GROUP BY job.id
-    ORDER BY job.priority DESC, job.created
-    LIMIT 1 FOR UPDATE},
-   @{ $options->{queues} || ['default']}, @{ $tasks }
-  )->hash;
+  my $query = sprintf(
+    GET_ITEM_FROM_QUEUE,
+    $qq ? " AND job.queue IN ('$qq')" : "",
+    $qt ? " AND job.task IN ('$qt')" : ""
+  );
 
-  #; use Data::Dumper;
-  #; say "Dequeuing job: " . Dumper $job;
+  my $job = $tx->db->query($query)->hash;
 
   return undef unless $job;
 

@@ -2,7 +2,8 @@
    "abstract" : "MySQL backend",
    "author" : [
       "Brian Medley <bpmedley@cpan.org>",
-      "Doug Bell <preaction@cpan.org>"
+      "Doug Bell <preaction@cpan.org>",
+      "Dmitry Krylov <dkrylov@iponweb.net>"
    ],
    "dynamic_config" : 0,
    "generated_by" : "Dist::Zilla version 6.012, CPAN::Meta::Converter version 2.150010",
@@ -56,23 +57,23 @@
    "provides" : {
       "Minion::Backend::mysql" : {
          "file" : "lib/Minion/Backend/mysql.pm",
-         "version" : "0.14"
+         "version" : "0.15"
       }
    },
    "release_status" : "stable",
    "resources" : {
       "bugtracker" : {
-         "web" : "https://github.com/preaction/Minion-Backend-mysql/issues"
+         "web" : "https://github.com/pentabion/Minion-Backend-mysql/issues"
       },
-      "homepage" : "https://github.com/preaction/Minion-Backend-mysql",
+      "homepage" : "https://github.com/pentabion/Minion-Backend-mysql",
       "repository" : {
          "type" : "git",
-         "url" : "https://github.com/preaction/Minion-Backend-mysql.git",
-         "web" : "https://github.com/preaction/Minion-Backend-mysql"
+         "url" : "https://github.com/pentabion/Minion-Backend-mysql.git",
+         "web" : "https://github.com/pentabion/Minion-Backend-mysql"
       },
       "x_IRC" : "irc://irc.perl.org/#mojo"
    },
-   "version" : "0.14",
+   "version" : "0.15",
    "x_authority" : "cpan:PREACTION",
    "x_contributors" : [
       "Alexander Nalobin <nalobin@reg.ru>",
